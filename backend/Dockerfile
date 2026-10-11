@@ -1,42 +1,38 @@
-# ==========================================
+
 # Build Stage
-# ==========================================
 FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 
 WORKDIR /build
 
-# Cache dependency layer
+# Configure a mirror for Maven Central
+RUN mkdir -p /root/.m2 && \
+    printf '%s\n' \
+    '<settings><mirrors><mirror><id>google-central</id><name>Google Maven Central Mirror</name><url>https://maven-central.storage-download.googleapis.com/maven2/</url><mirrorOf>central</mirrorOf></mirror></mirrors></settings>' \
+    > /root/.m2/settings.xml
+
+# Copy Maven project files
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy source and package
 COPY src ./src
-RUN mvn clean package -DskipTests -B
 
-# ==========================================
+# Build the application
+RUN mvn -B -ntp clean package -DskipTests
+
 # Production Runtime Stage
-# ==========================================
 FROM eclipse-temurin:21-jre-alpine
 
-LABEL maintainer="CabFlow Platform Engineering <devops@cabflow.app>"
+LABEL maintainer="CabFlow Platform Engineering"
 LABEL description="CabFlow Production Backend Service"
 
-# Security: Create non-privileged user and group
 RUN addgroup -S cabgroup && adduser -S cabuser -G cabgroup
 
 WORKDIR /app
 
-# Copy executable jar from builder
 COPY --from=builder /build/target/*.jar app.jar
 RUN chown -R cabuser:cabgroup /app
 
 USER cabuser
 
 EXPOSE 8080
-
-# Health check using Spring Actuator
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
 ENV JAVA_OPTS="-XX:+UseG1GC -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
 ENV SPRING_PROFILES_ACTIVE="prod"
