@@ -1,0 +1,100 @@
+name: CabFlow Continuous Integration & Quality Gate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # ==========================================
+  # Backend Validation (Java 21 / Spring Boot 3)
+  # ==========================================
+  backend-ci:
+    name: Backend Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21 LTS (Eclipse Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Compile Backend & Run Automated Tests
+        working-directory: ./backend
+        run: |
+          mvn clean test -B -Dspring.profiles.active=test
+
+      - name: Package Executable Artifact
+        working-directory: ./backend
+        run: |
+          mvn package -DskipTests -B
+
+      - name: Upload Backend Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: ./backend/target/*.jar
+          retention-days: 7
+
+  # ==========================================
+  # Frontend Validation (React 18 / TypeScript / Vite)
+  # ==========================================
+  frontend-ci:
+    name: Frontend Typecheck & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package.json
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: |
+          npm ci
+
+      - name: Run Frontend Automated Unit Tests
+        working-directory: ./frontend
+        run: |
+          npm test -- --run
+
+      - name: Run TypeScript Strict Typecheck & Vite Production Build
+        working-directory: ./frontend
+        run: |
+          npm run build
+
+      - name: Upload Frontend Static Assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: ./frontend/dist
+          retention-days: 7
+
+  # ==========================================
+  # Container Validation
+  # ==========================================
+  docker-validation:
+    name: Docker Configuration Validation
+    needs: [backend-ci, frontend-ci]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Config
+        working-directory: ./infrastructure
+        run: |
+          docker compose config -q

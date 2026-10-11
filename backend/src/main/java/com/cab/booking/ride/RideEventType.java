@@ -1,0 +1,14 @@
+package com.cab.booking.ride;
+
+public enum RideEventType {
+    RIDE_REQUESTED,
+    DRIVER_ASSIGNED,
+    DRIVER_DISPATCHED,
+    DRIVER_ARRIVED,
+    RIDE_STARTED,
+    RIDE_COMPLETED,
+    RIDE_CANCELLED,
+    PAYMENT_INITIATED,
+    PAYMENT_COMPLETED,
+    RATING_SUBMITTED
+}
