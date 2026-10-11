@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { adminService } from '../../services/adminService';
+import { formatCurrency } from '../../utils/formatters';
 
 const statusColor: Record<string, string> = {
   REQUESTED:   'bg-yellow-100 text-yellow-700',
@@ -65,7 +66,7 @@ export default function AdminRidesPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-gray-600">{ride.vehicleCategory}</td>
-                      <td className="px-4 py-3 font-medium">\${(ride.finalFare ?? ride.estimatedFare ?? 0).toFixed(2)}</td>
+                      <td className="px-4 py-3 font-medium">{formatCurrency(ride.finalFare ?? ride.estimatedFare ?? 0, ride.currency)}</td>
                       <td className="px-4 py-3 text-gray-400">{new Date(ride.requestedAt).toLocaleDateString()}</td>
                     </tr>
                   ))}

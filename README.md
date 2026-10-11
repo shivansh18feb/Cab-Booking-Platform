@@ -36,7 +36,7 @@ A complete, enterprise-grade, full-stack cab-booking application inspired by Ube
 | **Backend** | Java 21 LTS, Spring Boot 3.4.3, Spring Data JPA / Hibernate, Spring Security 6, JJWT 0.12.6 |
 | **Realtime** | Spring WebSocket (STOMP over SockJS) |
 | **Database** | PostgreSQL 16 (production), Flyway Migrations, H2 in-memory (testing/dev) |
-| **Payments** | Stripe Java SDK 28.0 (with sandbox fallback and webhook signature verification) |
+| **Payments** | Razorpay Java SDK 1.4.8 (Order creation, HMAC-SHA256 signature verification, webhooks, refunds) |
 | **PDF Generation** | OpenPDF 2.0.3 |
 | **API Docs** | SpringDoc OpenAPI 2.8.5 (Swagger UI) |
 | **Frontend** | React 18, TypeScript (strict), Vite 5, Tailwind CSS, TanStack Query v5 |
@@ -153,7 +153,7 @@ Spring Security 6 (JWT + Refresh Tokens)
 Controllers (Auth, Rider, Driver, Ride, Pricing, Payment, Admin)
        │
        ▼
-Service Layer (Atomic Dispatch, Fare Calculator, Stripe, Notifications)
+Service Layer (Atomic Dispatch, Fare Calculator, Razorpay, Notifications)
        │
        ▼
 Spring Data JPA & Hibernate
@@ -178,7 +178,7 @@ If two drivers accept simultaneously, exactly one row is updated and the second 
 - **Spring Boot**: [https://spring.io/projects/spring-boot](https://spring.io/projects/spring-boot)
 - **Spring Security**: [https://spring.io/projects/spring-security](https://spring.io/projects/spring-security)
 - **Hibernate ORM**: [https://hibernate.org/orm/](https://hibernate.org/orm/)
-- **Stripe Java SDK**: [https://stripe.com/docs/api?lang=java](https://stripe.com/docs/api?lang=java)
+- **Razorpay Documentation**: [https://razorpay.com/docs/payments/payment-gateway/server-integration/java/](https://razorpay.com/docs/payments/payment-gateway/server-integration/java/)
 - **Spring WebSocket**: [https://docs.spring.io/spring-framework/reference/web/websocket.html](https://docs.spring.io/spring-framework/reference/web/websocket.html)
 - **PostgreSQL**: [https://www.postgresql.org/docs/](https://www.postgresql.org/docs/)
 - **Docker**: [https://docs.docker.com/](https://docs.docker.com/)

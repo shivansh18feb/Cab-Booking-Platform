@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { rideService } from '../../services/rideService';
+import { formatCurrency } from '../../utils/formatters';
 
 const statusColor: Record<string, string> = {
   REQUESTED: 'bg-yellow-100 text-yellow-800',
@@ -55,7 +56,7 @@ export default function RideHistoryPage() {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="font-bold text-gray-900">\${(ride.finalFare ?? 0).toFixed(2)}</p>
+                  <p className="font-bold text-gray-900">{formatCurrency(ride.finalFare ?? 0, ride.currency)}</p>
                   <span className={`status-badge mt-1 ${statusColor[ride.status] ?? 'bg-gray-100 text-gray-600'}`}>
                     {ride.status.replace(/_/g, ' ')}
                   </span>

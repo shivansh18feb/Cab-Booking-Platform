@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/payments")
-@Tag(name = "Payments", description = "Endpoints for Stripe payment intent creation and confirmation")
+@Tag(name = "Payments", description = "Endpoints for Razorpay order creation, payment verification, and refunds")
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -21,24 +21,24 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    @PostMapping("/intent")
+    @PostMapping({"/create-order", "/intent"})
     @PreAuthorize("hasAnyRole('RIDER', 'ADMIN')")
-    @Operation(summary = "Create Stripe PaymentIntent for a completed ride")
-    public ResponseEntity<ApiResponse<PaymentIntentResponse>> createIntent(
+    @Operation(summary = "Create Razorpay Order for a completed ride")
+    public ResponseEntity<ApiResponse<RazorpayOrderResponse>> createOrder(
             @Valid @RequestBody PaymentIntentRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
-        PaymentIntentResponse response = paymentService.createPaymentIntent(request, principal);
-        return ResponseEntity.ok(ApiResponse.ok("Payment intent initialized", response));
+        RazorpayOrderResponse response = paymentService.createOrder(request.getRideId(), principal);
+        return ResponseEntity.ok(ApiResponse.ok("Razorpay order created successfully", response));
     }
 
-    @PostMapping("/confirm")
+    @PostMapping("/verify")
     @PreAuthorize("hasAnyRole('RIDER', 'ADMIN')")
-    @Operation(summary = "Confirm successful Stripe payment transaction")
-    public ResponseEntity<ApiResponse<Payment>> confirmPayment(
-            @Valid @RequestBody PaymentConfirmationRequest request,
+    @Operation(summary = "Verify Razorpay checkout payment signature and complete transaction")
+    public ResponseEntity<ApiResponse<Payment>> verifyPayment(
+            @Valid @RequestBody VerifyPaymentRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
-        Payment payment = paymentService.confirmPayment(request, principal);
-        return ResponseEntity.ok(ApiResponse.ok("Payment confirmed successfully", payment));
+        Payment payment = paymentService.verifyPayment(request, principal);
+        return ResponseEntity.ok(ApiResponse.ok("Payment verified and completed successfully", payment));
     }
 
     @GetMapping("/ride/{rideId}")
@@ -50,7 +50,7 @@ public class PaymentController {
 
     @PostMapping("/{paymentId}/refund")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Refund a completed trip payment")
+    @Operation(summary = "Refund a completed trip payment via Razorpay")
     public ResponseEntity<ApiResponse<Payment>> refundPayment(
             @PathVariable Long paymentId,
             @RequestBody(required = false) RefundPaymentRequest request) {

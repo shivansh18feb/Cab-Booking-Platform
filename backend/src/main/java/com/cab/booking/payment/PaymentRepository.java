@@ -12,5 +12,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByRideId(Long rideId);
     Optional<Payment> findByIdempotencyKey(String idempotencyKey);
     Optional<Payment> findByProviderPaymentIntentId(String providerPaymentIntentId);
+    Optional<Payment> findByProviderPaymentId(String providerPaymentId);
     long countByPaymentStatus(PaymentStatus status);
 }

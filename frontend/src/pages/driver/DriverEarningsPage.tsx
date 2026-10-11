@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { driverService } from '../../services/driverService';
+import { formatCurrency } from '../../utils/formatters';
 
 export default function DriverEarningsPage() {
   const { data: earnings, isLoading } = useQuery({
@@ -31,7 +32,7 @@ export default function DriverEarningsPage() {
             ].map(card => (
               <div key={card.label} className="card text-center">
                 <div className="text-3xl mb-2">{card.icon}</div>
-                <p className={`text-2xl font-bold ${card.color}`}>\${card.value.toFixed(2)}</p>
+                <p className={`text-2xl font-bold ${card.color}`}>{formatCurrency(card.value)}</p>
                 <p className="text-xs text-gray-400 mt-1">{card.label}</p>
               </div>
             ))}
@@ -45,13 +46,13 @@ export default function DriverEarningsPage() {
                 { dt: 'Total Trips',     dd: earnings?.totalRides ?? 0 },
                 { dt: 'Trips Today',     dd: earnings?.todayRides ?? 0 },
                 { dt: 'Trips This Week', dd: earnings?.weekRides  ?? 0 },
-                { dt: 'Avg. Per Ride',   dd: `\$${(earnings?.avgPerRide ?? 0).toFixed(2)}` },
+                { dt: 'Avg. Per Ride',   dd: formatCurrency(earnings?.avgPerRide ?? 0) },
                 { dt: 'Cancellations',   dd: earnings?.cancellations ?? 0 },
                 { dt: 'Acceptance Rate', dd: `${earnings?.acceptanceRate ?? 0}%` },
               ].map(item => (
                 <div key={item.dt}>
                   <dt className="text-xs text-gray-400">{item.dt}</dt>
-                  <dd className="text-lg font-bold text-gray-900 mt-0.5">{item.dd}</dd>
+                  <dd className="lg:text-lg font-bold text-gray-900 mt-0.5">{item.dd}</dd>
                 </div>
               ))}
             </dl>
@@ -68,7 +69,7 @@ export default function DriverEarningsPage() {
                       <p className="text-sm font-medium text-gray-900">{ride.pickupAddress?.slice(0, 35)}…</p>
                       <p className="text-xs text-gray-400">{new Date(ride.completedAt ?? ride.requestedAt).toLocaleDateString()}</p>
                     </div>
-                    <span className="font-semibold text-green-600">+\${(ride.finalFare ?? 0).toFixed(2)}</span>
+                    <span className="font-semibold text-green-600">+{formatCurrency(ride.finalFare ?? 0, ride.currency)}</span>
                   </div>
                 ))}
               </div>

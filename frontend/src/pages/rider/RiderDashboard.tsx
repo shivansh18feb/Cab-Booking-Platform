@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { rideService } from '../../services/rideService';
+import { formatCurrency } from '../../utils/formatters';
 
 const statusColor: Record<string, string> = {
   REQUESTED:   'bg-yellow-100 text-yellow-800',
@@ -116,7 +117,7 @@ export default function RiderDashboard() {
                   <p className="text-xs text-gray-400">{new Date(ride.requestedAt).toLocaleDateString()}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-semibold text-gray-900">\${ride.finalFare?.toFixed(2) ?? '—'}</p>
+                  <p className="text-sm font-semibold text-gray-900">{formatCurrency(ride.finalFare, ride.currency)}</p>
                   <span className={`status-badge ${statusColor[ride.status] ?? ''}`}>{ride.status}</span>
                 </div>
               </Link>

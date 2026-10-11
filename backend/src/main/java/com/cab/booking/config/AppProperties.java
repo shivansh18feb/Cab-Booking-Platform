@@ -8,7 +8,7 @@ public class AppProperties {
 
     private Jwt jwt = new Jwt();
     private Cors cors = new Cors();
-    private Stripe stripe = new Stripe();
+    private Razorpay razorpay = new Razorpay();
     private Mail mail = new Mail();
 
     public static class Jwt {
@@ -25,19 +25,27 @@ public class AppProperties {
     }
 
     public static class Cors {
-        private List<String> allowedOrigins = List.of("http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173");
+        private List<String> allowedOrigins = List.of(
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "https://cab-booking-platform-seven.vercel.app"
+        );
 
         public List<String> getAllowedOrigins() { return allowedOrigins; }
         public void setAllowedOrigins(List<String> allowedOrigins) { this.allowedOrigins = allowedOrigins; }
     }
 
-    public static class Stripe {
-        private String apiKey = "";
+    public static class Razorpay {
+        private String keyId = "";
+        private String keySecret = "";
         private String webhookSecret = "";
-        private String currency = "usd";
+        private String currency = "INR";
 
-        public String getApiKey() { return apiKey; }
-        public void setApiKey(String apiKey) { this.apiKey = apiKey; }
+        public String getKeyId() { return keyId; }
+        public void setKeyId(String keyId) { this.keyId = keyId; }
+        public String getKeySecret() { return keySecret; }
+        public void setKeySecret(String keySecret) { this.keySecret = keySecret; }
         public String getWebhookSecret() { return webhookSecret; }
         public void setWebhookSecret(String webhookSecret) { this.webhookSecret = webhookSecret; }
         public String getCurrency() { return currency; }
@@ -55,8 +63,8 @@ public class AppProperties {
     public void setJwt(Jwt jwt) { this.jwt = jwt; }
     public Cors getCors() { return cors; }
     public void setCors(Cors cors) { this.cors = cors; }
-    public Stripe getStripe() { return stripe; }
-    public void setStripe(Stripe stripe) { this.stripe = stripe; }
+    public Razorpay getRazorpay() { return razorpay; }
+    public void setRazorpay(Razorpay razorpay) { this.razorpay = razorpay; }
     public Mail getMail() { return mail; }
     public void setMail(Mail mail) { this.mail = mail; }
 }

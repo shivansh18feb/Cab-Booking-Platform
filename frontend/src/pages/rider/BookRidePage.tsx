@@ -5,6 +5,7 @@ import { rideService } from '../../services/rideService';
 import RideMap from '../../components/Map/RideMap';
 import { VehicleCategory } from '../../types/ride';
 import type { LocationPoint, FareEstimate } from '../../types/ride';
+import { formatCurrency } from '../../utils/formatters';
 
 const vehicleOptions: { type: VehicleCategory; label: string; icon: string; desc: string }[] = [
   { type: VehicleCategory.HATCHBACK, label: 'Hatchback', icon: '🚗', desc: 'Affordable & compact' },
@@ -213,12 +214,12 @@ export default function BookRidePage() {
                 <div className="text-sm space-y-1">
                   <div className="flex justify-between"><span className="text-gray-600">Distance</span><span className="font-medium">{estimate.distanceKm.toFixed(1)} km</span></div>
                   <div className="flex justify-between"><span className="text-gray-600">Duration</span><span className="font-medium">{estimate.durationMin} min</span></div>
-                  <div className="flex justify-between"><span className="text-gray-600">Base Fare</span><span className="font-medium">\${estimate.baseFare.toFixed(2)}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-600">Base Fare</span><span className="font-medium">{formatCurrency(estimate.baseFare, estimate.currency)}</span></div>
                   {estimate.discountAmount > 0 && (
-                    <div className="flex justify-between text-green-600"><span>Promo Discount</span><span>-\${estimate.discountAmount.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-green-600"><span>Promo Discount</span><span>-{formatCurrency(estimate.discountAmount, estimate.currency)}</span></div>
                   )}
                   <div className="flex justify-between font-bold text-indigo-900 text-base pt-1 border-t border-indigo-200">
-                    <span>Total</span><span>\${(estimate.estimatedFare ?? estimate.totalEstimatedFare ?? 0).toFixed(2)}</span>
+                    <span>Total</span><span>{formatCurrency(estimate.estimatedFare ?? estimate.totalEstimatedFare ?? 0, estimate.currency)}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">

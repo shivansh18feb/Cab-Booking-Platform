@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { driverService } from '../../services/driverService';
 import { websocketService } from '../../services/websocketService';
 import { useAuth } from '../../context/AuthContext';
+import { formatCurrency } from '../../utils/formatters';
 import type { Ride } from '../../types/ride';
 
 interface IncomingRequest {
@@ -106,7 +107,7 @@ export default function DriverDashboard() {
             <p><span className="font-medium">Pickup:</span> {incomingRequest.pickupAddress}</p>
             <p><span className="font-medium">Drop-off:</span> {incomingRequest.dropoffAddress}</p>
             <p><span className="font-medium">Vehicle:</span> {incomingRequest.vehicleCategory}</p>
-            <p><span className="font-medium">Fare:</span> ~\${incomingRequest.estimatedFare?.toFixed(2)}</p>
+            <p><span className="font-medium">Fare:</span> ~{formatCurrency(incomingRequest.estimatedFare)}</p>
           </div>
           <div className="flex gap-3">
             <button

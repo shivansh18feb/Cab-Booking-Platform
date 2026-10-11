@@ -21,13 +21,19 @@ public class Payment {
     private BigDecimal amount;
 
     @Column(nullable = false, length = 10)
-    private String currency = "USD";
+    private String currency = "INR";
 
     @Column(name = "payment_provider", nullable = false, length = 30)
-    private String paymentProvider = "STRIPE";
+    private String paymentProvider = "RAZORPAY";
 
     @Column(name = "provider_payment_intent_id", length = 100)
     private String providerPaymentIntentId;
+
+    @Column(name = "provider_payment_id", length = 100)
+    private String providerPaymentId;
+
+    @Column(name = "provider_signature", length = 255)
+    private String providerSignature;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false, length = 30)
@@ -53,10 +59,10 @@ public class Payment {
     public Payment(Ride ride, BigDecimal amount, String currency, String idempotencyKey) {
         this.ride = ride;
         this.amount = amount;
-        this.currency = currency;
+        this.currency = currency != null ? currency : "INR";
         this.idempotencyKey = idempotencyKey;
         this.paymentStatus = PaymentStatus.PENDING;
-        this.paymentProvider = "STRIPE";
+        this.paymentProvider = "RAZORPAY";
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
     }
@@ -78,6 +84,10 @@ public class Payment {
     public void setPaymentProvider(String paymentProvider) { this.paymentProvider = paymentProvider; }
     public String getProviderPaymentIntentId() { return providerPaymentIntentId; }
     public void setProviderPaymentIntentId(String providerPaymentIntentId) { this.providerPaymentIntentId = providerPaymentIntentId; }
+    public String getProviderPaymentId() { return providerPaymentId; }
+    public void setProviderPaymentId(String providerPaymentId) { this.providerPaymentId = providerPaymentId; }
+    public String getProviderSignature() { return providerSignature; }
+    public void setProviderSignature(String providerSignature) { this.providerSignature = providerSignature; }
     public PaymentStatus getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
     public String getIdempotencyKey() { return idempotencyKey; }

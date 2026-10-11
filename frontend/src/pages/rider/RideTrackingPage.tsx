@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { rideService } from '../../services/rideService';
+import { paymentService } from '../../services/paymentService';
 import { websocketService } from '../../services/websocketService';
 import RideMap from '../../components/Map/RideMap';
+import { formatCurrency } from '../../utils/formatters';
 import type { LocationPoint } from '../../types/ride';
 
 const STATUS_LABELS: Record<string, { label: string; color: string; icon: string }> = {
@@ -21,6 +23,10 @@ export default function RideTrackingPage() {
   const [driverLocation, setDriverLocation] = useState<LocationPoint | null>(null);
   const subRef = useRef<(() => void) | null>(null);
 
+  const [isPaying, setIsPaying] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
   const { data: ride } = useQuery({
     queryKey: ['ride', id],
     queryFn: () => rideService.getRide(id!),
@@ -28,6 +34,12 @@ export default function RideTrackingPage() {
       const status = query.state.data?.status;
       return status === 'COMPLETED' || status === 'CANCELLED' ? false : 8000;
     },
+  });
+
+  const { data: payment, refetch: refetchPayment } = useQuery({
+    queryKey: ['payment', id],
+    queryFn: () => paymentService.getPayment(id!),
+    enabled: !!id && ride?.status === 'COMPLETED',
   });
 
   const cancelMutation = useMutation({
@@ -48,6 +60,42 @@ export default function RideTrackingPage() {
     onSuccess: () => setSosSuccess(true),
   });
 
+  const handlePayNow = async () => {
+    if (!id) return;
+    setIsPaying(true);
+    setPaymentError(null);
+    try {
+      await paymentService.initiateCheckout({
+        rideId: id,
+        onSuccess: (verifiedPayment) => {
+          setIsPaying(false);
+          setPaymentSuccess(true);
+          qc.setQueryData(['payment', id], verifiedPayment);
+          qc.invalidateQueries({ queryKey: ['ride', id] });
+          refetchPayment();
+        },
+        onError: (err: any) => {
+          setIsPaying(false);
+          const msg =
+            err?.response?.data?.message ||
+            err?.message ||
+            'Payment verification failed. Please try again.';
+          setPaymentError(msg);
+        },
+        onDismiss: () => {
+          setIsPaying(false);
+        },
+      });
+    } catch (err: any) {
+      setIsPaying(false);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Unable to initialize Razorpay checkout.';
+      setPaymentError(msg);
+    }
+  };
+
   /* WebSocket subscription */
   useEffect(() => {
     if (!id) return;
@@ -56,6 +104,7 @@ export default function RideTrackingPage() {
       // Ride status updates
       subRef.current = websocketService.subscribe(`/topic/rides/${id}`, (msg) => {
         qc.setQueryData(['ride', id], (old: any) => ({ ...old, ...msg }));
+        refetchPayment();
       });
 
       // Driver location updates
@@ -68,9 +117,15 @@ export default function RideTrackingPage() {
       subRef.current?.();
       // Don't disconnect – other pages may be using it
     };
-  }, [id, qc]);
+  }, [id, qc, refetchPayment]);
 
-  const statusInfo = STATUS_LABELS[ride?.status ?? ''] ?? { label: ride?.status ?? '', color: 'text-gray-600', icon: '🚕' };
+  const statusInfo = STATUS_LABELS[ride?.status ?? ''] ?? {
+    label: ride?.status ?? '',
+    color: 'text-gray-600',
+    icon: '🚕',
+  };
+
+  const isPaid = payment?.paymentStatus === 'COMPLETED' || paymentSuccess;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -132,16 +187,61 @@ export default function RideTrackingPage() {
               </div>
             )}
 
-            {/* Fare */}
+            {/* Fare & Payment */}
             {ride && (
               <div className="card">
-                <h3 className="font-semibold text-gray-800 mb-2">Fare</h3>
+                <h3 className="font-semibold text-gray-800 mb-2">Fare & Payment</h3>
                 <div className="text-2xl font-bold text-indigo-600">
-                  \${(ride.finalFare ?? ride.estimatedFare ?? 0).toFixed(2)}
+                  {formatCurrency(ride.finalFare ?? ride.estimatedFare ?? 0, ride.currency)}
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
                   {ride.status === 'COMPLETED' ? 'Final fare' : 'Estimated fare'}
                 </p>
+
+                {ride.status === 'COMPLETED' && (
+                  <div className="mt-4 pt-3 border-t border-gray-100 space-y-3">
+                    {isPaid ? (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+                        <div className="flex items-center justify-between font-semibold">
+                          <span>✅ Paid via Razorpay</span>
+                          {payment?.providerPaymentId && (
+                            <span className="text-xs font-mono text-green-600">
+                              {payment.providerPaymentId}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-green-600 mt-0.5">
+                          Payment verified and confirmed
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <button
+                          onClick={handlePayNow}
+                          disabled={isPaying}
+                          className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow transition flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                          {isPaying ? (
+                            <>
+                              <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                              Opening Razorpay…
+                            </>
+                          ) : (
+                            <>
+                              <span>💳</span>
+                              Pay {formatCurrency(ride.finalFare ?? ride.estimatedFare ?? 0, ride.currency)} with Razorpay
+                            </>
+                          )}
+                        </button>
+                        {paymentError && (
+                          <p className="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200">
+                            {paymentError}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -210,7 +310,7 @@ export default function RideTrackingPage() {
 
             {ride?.status === 'COMPLETED' && (
               <Link to={`/rider/ride/${id}`} className="btn-secondary w-full text-center block">
-                View Receipt
+                View Receipt & Details
               </Link>
             )}
           </div>
