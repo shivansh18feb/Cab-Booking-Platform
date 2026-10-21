@@ -44,8 +44,8 @@ export default function TermsPage() {
         <section className="card">
           <h2 className="section-title mb-3">5. Payments & Refunds</h2>
           <p className="text-gray-600 text-sm leading-relaxed">
-            All payments are processed securely via Stripe. Fares are calculated based on distance, time, and
-            vehicle type. Cancellation fees may apply. Refund requests are evaluated on a case-by-case basis
+            All digital payments are processed securely via Razorpay with encrypted payment verification. Fares are calculated based on distance, time, and
+            vehicle type in INR (₹). Cancellation fees may apply. Refund requests are evaluated on a case-by-case basis
             through our support team.
           </p>
         </section>

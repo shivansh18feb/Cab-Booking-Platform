@@ -136,6 +136,16 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.ok(rides));
     }
 
+    @GetMapping("/rides/export")
+    @Operation(summary = "Export full rides dataset to CSV")
+    public ResponseEntity<byte[]> exportRidesCsv() {
+        byte[] csv = adminService.exportRidesCsv();
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"cabflow_rides.csv\"")
+                .contentType(org.springframework.http.MediaType.parseMediaType("text/csv"))
+                .body(csv);
+    }
+
     // ── Support Tickets ──────────────────────────────────────────────────────────
 
     @GetMapping("/tickets")

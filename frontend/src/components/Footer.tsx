@@ -59,10 +59,14 @@ export const Footer: React.FC = () => {
               <PhoneCall className="h-4 w-4 text-rose-400" />
               <span>Emergency SOS Assist</span>
             </li>
-            <li className="pt-2">
-              <Link to="/terms-privacy" className="text-xs text-slate-500 hover:text-slate-300 transition">
-                Terms of Service & Privacy Policy
-              </Link>
+            <li className="pt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+              <Link to="/about" className="hover:text-slate-300 transition">About</Link>
+              <span>•</span>
+              <Link to="/contact" className="hover:text-slate-300 transition">Contact</Link>
+              <span>•</span>
+              <Link to="/privacy" className="hover:text-slate-300 transition">Privacy</Link>
+              <span>•</span>
+              <Link to="/terms" className="hover:text-slate-300 transition">Terms</Link>
             </li>
           </ul>
         </div>

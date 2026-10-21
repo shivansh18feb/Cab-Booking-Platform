@@ -122,4 +122,26 @@ public class AdminDashboardService {
     public Page<SupportTicketDto> getAllTickets(Pageable pageable) {
         return supportTicketRepository.findAll(pageable).map(SupportTicketDto::fromEntity);
     }
+
+    @Transactional(readOnly = true)
+    public byte[] exportRidesCsv() {
+        List<Ride> rides = rideRepository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "requestedAt"));
+        StringBuilder sb = new StringBuilder();
+        sb.append("Ride ID,Rider Name,Driver Name,Status,Pickup Address,Dropoff Address,Fare (INR),Distance (KM),Requested At\n");
+        for (Ride r : rides) {
+            String riderName = r.getRider() != null ? r.getRider().getFullName() : "Unknown";
+            String driverName = r.getDriver() != null && r.getDriver().getUser() != null ? r.getDriver().getUser().getFullName() : "Unassigned";
+            java.math.BigDecimal fare = r.getFinalFare() != null ? r.getFinalFare() : (r.getEstimatedFare() != null ? r.getEstimatedFare() : java.math.BigDecimal.ZERO);
+            sb.append(r.getId()).append(",")
+              .append("\"").append(riderName.replace("\"", "\"\"")).append("\",")
+              .append("\"").append(driverName.replace("\"", "\"\"")).append("\",")
+              .append(r.getRideStatus()).append(",")
+              .append("\"").append(r.getPickupAddress() != null ? r.getPickupAddress().replace("\"", "\"\"") : "").append("\",")
+              .append("\"").append(r.getDropoffAddress() != null ? r.getDropoffAddress().replace("\"", "\"\"") : "").append("\",")
+              .append(fare).append(",")
+              .append(r.getDistanceKm() != null ? r.getDistanceKm() : "0.0").append(",")
+              .append(r.getRequestedAt() != null ? r.getRequestedAt().toString() : "").append("\n");
+        }
+        return sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    }
 }

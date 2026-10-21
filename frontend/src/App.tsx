@@ -40,6 +40,9 @@ const AdminAuditLogsPage      = lazy(() => import('./pages/admin/AdminAuditLogsP
 // Misc
 const SupportPage             = lazy(() => import('./pages/SupportPage'));
 const TermsPage               = lazy(() => import('./pages/TermsPage'));
+const AboutPage               = lazy(() => import('./pages/AboutPage'));
+const ContactPage             = lazy(() => import('./pages/ContactPage'));
+const PrivacyPage             = lazy(() => import('./pages/PrivacyPage'));
 const NotificationsPage       = lazy(() => import('./pages/NotificationsPage'));
 
 const PageLoader = () => (
@@ -63,6 +66,10 @@ export default function App() {
             <Route path="/register" element={user ? <Navigate to={roleHome(user.role)} replace /> : <RegisterPage />} />
             <Route path="/driver/register" element={user ? <Navigate to={roleHome(user.role)} replace /> : <DriverRegisterPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/terms-privacy" element={<TermsPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/support" element={<SupportPage />} />
 
             {/* Rider */}

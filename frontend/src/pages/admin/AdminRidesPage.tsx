@@ -28,16 +28,24 @@ export default function AdminRidesPage() {
           <Link to="/admin/dashboard" className="text-gray-400 hover:text-gray-600">← Dashboard</Link>
           <h1 className="page-title">All Rides</h1>
         </div>
-        <select
-          value={statusFilter}
-          onChange={e => { setStatusFilter(e.target.value); setPage(0); }}
-          className="input-field w-44 text-sm"
-        >
-          <option value="">All statuses</option>
-          {['REQUESTED', 'ACCEPTED', 'DRIVER_ARRIVING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].map(s => (
-            <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
-          ))}
-        </select>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => adminService.exportRidesCsv()}
+            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5"
+          >
+            <span>📥 Export CSV</span>
+          </button>
+          <select
+            value={statusFilter}
+            onChange={e => { setStatusFilter(e.target.value); setPage(0); }}
+            className="input-field w-44 text-sm"
+          >
+            <option value="">All statuses</option>
+            {['SCHEDULED', 'REQUESTED', 'ACCEPTED', 'DRIVER_ARRIVING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].map(s => (
+              <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {isLoading ? (

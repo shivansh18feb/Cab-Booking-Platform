@@ -54,6 +54,18 @@ export const adminService = {
     };
   },
 
+  async exportRidesCsv(): Promise<void> {
+    const res = await apiClient.get('/admin/rides/export', { responseType: 'blob' });
+    const url = window.URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'cabflow_rides.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
   async getAllTickets(page = 0, size = 10, status?: string): Promise<{ content: any[]; totalPages: number; totalElements: number }> {
     const statusParam = status ? `&status=${encodeURIComponent(status)}` : '';
     const res = await apiClient.get(`/admin/tickets?page=${page}&size=${size}${statusParam}`);
