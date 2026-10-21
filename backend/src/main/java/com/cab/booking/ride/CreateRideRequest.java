@@ -3,6 +3,7 @@ package com.cab.booking.ride;
 import com.cab.booking.driver.VehicleCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 
 public class CreateRideRequest {
 
@@ -26,6 +27,7 @@ public class CreateRideRequest {
 
     private VehicleCategory vehicleCategory = VehicleCategory.SEDAN;
     private String promoCode;
+    private Instant scheduledFor;
 
     public CreateRideRequest() {}
 
@@ -45,4 +47,6 @@ public class CreateRideRequest {
     public void setVehicleCategory(VehicleCategory vehicleCategory) { this.vehicleCategory = vehicleCategory; }
     public String getPromoCode() { return promoCode; }
     public void setPromoCode(String promoCode) { this.promoCode = promoCode; }
+    public Instant getScheduledFor() { return scheduledFor; }
+    public void setScheduledFor(Instant scheduledFor) { this.scheduledFor = scheduledFor; }
 }

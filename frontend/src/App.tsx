@@ -6,35 +6,41 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
 
 /* ── Lazy-loaded pages ── */
-const LandingPage         = lazy(() => import('./pages/LandingPage'));
-const LoginPage           = lazy(() => import('./pages/LoginPage'));
-const RegisterPage        = lazy(() => import('./pages/RegisterPage'));
-const DriverRegisterPage  = lazy(() => import('./pages/DriverRegisterPage'));
+const LandingPage             = lazy(() => import('./pages/LandingPage'));
+const LoginPage               = lazy(() => import('./pages/LoginPage'));
+const RegisterPage            = lazy(() => import('./pages/RegisterPage'));
+const DriverRegisterPage      = lazy(() => import('./pages/DriverRegisterPage'));
 
 // Rider
-const RiderDashboard      = lazy(() => import('./pages/rider/RiderDashboard'));
-const BookRidePage        = lazy(() => import('./pages/rider/BookRidePage'));
-const RideTrackingPage    = lazy(() => import('./pages/rider/RideTrackingPage'));
-const RideHistoryPage     = lazy(() => import('./pages/rider/RideHistoryPage'));
-const RideDetailPage      = lazy(() => import('./pages/rider/RideDetailPage'));
-const SavedPlacesPage     = lazy(() => import('./pages/rider/SavedPlacesPage'));
-const PromotionsPage      = lazy(() => import('./pages/rider/PromotionsPage'));
+const RiderDashboard          = lazy(() => import('./pages/rider/RiderDashboard'));
+const BookRidePage            = lazy(() => import('./pages/rider/BookRidePage'));
+const RideTrackingPage        = lazy(() => import('./pages/rider/RideTrackingPage'));
+const RideHistoryPage         = lazy(() => import('./pages/rider/RideHistoryPage'));
+const RideDetailPage          = lazy(() => import('./pages/rider/RideDetailPage'));
+const SavedPlacesPage         = lazy(() => import('./pages/rider/SavedPlacesPage'));
+const PromotionsPage          = lazy(() => import('./pages/rider/PromotionsPage'));
+const RiderProfilePage        = lazy(() => import('./pages/rider/RiderProfilePage'));
+const PaymentsHistoryPage     = lazy(() => import('./pages/rider/PaymentsHistoryPage'));
 
 // Driver
-const DriverDashboard     = lazy(() => import('./pages/driver/DriverDashboard'));
-const DriverEarningsPage  = lazy(() => import('./pages/driver/DriverEarningsPage'));
-const DriverProfilePage   = lazy(() => import('./pages/driver/DriverProfilePage'));
+const DriverDashboard         = lazy(() => import('./pages/driver/DriverDashboard'));
+const DriverEarningsPage      = lazy(() => import('./pages/driver/DriverEarningsPage'));
+const DriverProfilePage       = lazy(() => import('./pages/driver/DriverProfilePage'));
 
 // Admin
-const AdminDashboard      = lazy(() => import('./pages/admin/AdminDashboard'));
-const AdminUsersPage      = lazy(() => import('./pages/admin/AdminUsersPage'));
-const AdminDriversPage    = lazy(() => import('./pages/admin/AdminDriversPage'));
-const AdminRidesPage      = lazy(() => import('./pages/admin/AdminRidesPage'));
+const AdminDashboard          = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminUsersPage          = lazy(() => import('./pages/admin/AdminUsersPage'));
+const AdminDriversPage        = lazy(() => import('./pages/admin/AdminDriversPage'));
+const AdminRidesPage          = lazy(() => import('./pages/admin/AdminRidesPage'));
+const AdminSupportPage        = lazy(() => import('./pages/admin/AdminSupportPage'));
+const AdminPromotionsPage     = lazy(() => import('./pages/admin/AdminPromotionsPage'));
+const AdminReviewsPage        = lazy(() => import('./pages/admin/AdminReviewsPage'));
+const AdminAuditLogsPage      = lazy(() => import('./pages/admin/AdminAuditLogsPage'));
 
 // Misc
-const SupportPage         = lazy(() => import('./pages/SupportPage'));
-const TermsPage           = lazy(() => import('./pages/TermsPage'));
-const NotificationsPage   = lazy(() => import('./pages/NotificationsPage'));
+const SupportPage             = lazy(() => import('./pages/SupportPage'));
+const TermsPage               = lazy(() => import('./pages/TermsPage'));
+const NotificationsPage       = lazy(() => import('./pages/NotificationsPage'));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -81,6 +87,12 @@ export default function App() {
             <Route path="/rider/promotions" element={
               <ProtectedRoute roles={['RIDER']}><PromotionsPage /></ProtectedRoute>
             } />
+            <Route path="/rider/profile" element={
+              <ProtectedRoute roles={['RIDER']}><RiderProfilePage /></ProtectedRoute>
+            } />
+            <Route path="/rider/payments" element={
+              <ProtectedRoute roles={['RIDER']}><PaymentsHistoryPage /></ProtectedRoute>
+            } />
 
             {/* Driver */}
             <Route path="/driver/dashboard" element={
@@ -105,6 +117,18 @@ export default function App() {
             } />
             <Route path="/admin/rides" element={
               <ProtectedRoute roles={['ADMIN']}><AdminRidesPage /></ProtectedRoute>
+            } />
+            <Route path="/admin/support" element={
+              <ProtectedRoute roles={['ADMIN']}><AdminSupportPage /></ProtectedRoute>
+            } />
+            <Route path="/admin/promotions" element={
+              <ProtectedRoute roles={['ADMIN']}><AdminPromotionsPage /></ProtectedRoute>
+            } />
+            <Route path="/admin/reviews" element={
+              <ProtectedRoute roles={['ADMIN']}><AdminReviewsPage /></ProtectedRoute>
+            } />
+            <Route path="/admin/audit-logs" element={
+              <ProtectedRoute roles={['ADMIN']}><AdminAuditLogsPage /></ProtectedRoute>
             } />
 
             {/* Notifications (all authenticated users) */}

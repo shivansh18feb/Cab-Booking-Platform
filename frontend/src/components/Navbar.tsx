@@ -73,6 +73,19 @@ export const Navbar: React.FC = () => {
                       <span>My Rides</span>
                     </Link>
                     <Link
+                      to="/rider/payments"
+                      className="text-slate-300 hover:text-white flex items-center space-x-1.5 text-sm font-medium transition"
+                    >
+                      <CreditCard className="h-4 w-4 text-emerald-400" />
+                      <span>Payments</span>
+                    </Link>
+                    <Link
+                      to="/rider/profile"
+                      className="text-slate-300 hover:text-white flex items-center space-x-1.5 text-sm font-medium transition"
+                    >
+                      <span>Profile</span>
+                    </Link>
+                    <Link
                       to="/rider/saved-places"
                       className="text-slate-300 hover:text-white flex items-center space-x-1.5 text-sm font-medium transition"
                     >
@@ -215,6 +228,20 @@ export const Navbar: React.FC = () => {
                     className="block text-slate-300 py-1.5"
                   >
                     Ride History
+                  </Link>
+                  <Link
+                    to="/rider/payments"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-slate-300 py-1.5"
+                  >
+                    Payment History & Receipts
+                  </Link>
+                  <Link
+                    to="/rider/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-slate-300 py-1.5"
+                  >
+                    Profile & Settings
                   </Link>
                   <Link
                     to="/rider/saved-places"

@@ -5,6 +5,7 @@ import com.cab.booking.common.ConflictException;
 import com.cab.booking.common.ResourceNotFoundException;
 import com.cab.booking.config.AppProperties;
 import com.cab.booking.driver.*;
+import com.cab.booking.email.EmailService;
 import com.cab.booking.security.JwtTokenProvider;
 import com.cab.booking.security.UserPrincipal;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,6 +33,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final AppProperties appProperties;
+    private final EmailService emailService;
 
     public AuthService(UserRepository userRepository,
                        RefreshTokenRepository refreshTokenRepository,
@@ -42,7 +44,8 @@ public class AuthService {
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
                        JwtTokenProvider tokenProvider,
-                       AppProperties appProperties) {
+                       AppProperties appProperties,
+                       EmailService emailService) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
@@ -53,6 +56,7 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.appProperties = appProperties;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -237,7 +241,9 @@ public class AuthService {
             Instant expiry = Instant.now().plus(java.time.Duration.ofMinutes(30));
             PasswordResetToken resetToken = new PasswordResetToken(user, token, expiry);
             passwordResetTokenRepository.save(resetToken);
-            log.info("Password reset token generated for user {}: {}", email, token);
+            log.info("Password reset token generated for user {}", email);
+            // Send actual email (async, non-blocking)
+            emailService.sendPasswordResetEmail(email, token, appProperties.getFrontendBaseUrl());
         });
     }
 
@@ -301,7 +307,9 @@ public class AuthService {
         Instant expiry = Instant.now().plus(java.time.Duration.ofHours(24));
         EmailVerificationToken verifToken = new EmailVerificationToken(user, token, expiry);
         emailVerificationTokenRepository.save(verifToken);
-        log.info("Email verification token generated for {}: {}", user.getEmail(), token);
+        log.info("Email verification token generated for {}", user.getEmail());
+        // Send actual email (async, non-blocking)
+        emailService.sendEmailVerification(user.getEmail(), user.getFullName(), token, appProperties.getFrontendBaseUrl());
     }
 
     @Transactional

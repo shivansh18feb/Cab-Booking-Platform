@@ -57,6 +57,7 @@ export const rideService = {
       dropoffLongitude: payload.dropoffLongitude ?? payload.dropoffLng,
       vehicleCategory: payload.vehicleCategory,
       promoCode: payload.promoCode,
+      scheduledFor: payload.scheduledFor,
     };
     const res = await apiClient.post('/rides', body);
     return normalizeRide(res.data.data);

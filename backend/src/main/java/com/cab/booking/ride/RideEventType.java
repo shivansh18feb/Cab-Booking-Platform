@@ -2,6 +2,7 @@ package com.cab.booking.ride;
 
 public enum RideEventType {
     RIDE_REQUESTED,
+    RIDE_SCHEDULED,
     DRIVER_ASSIGNED,
     DRIVER_DISPATCHED,
     DRIVER_ARRIVED,

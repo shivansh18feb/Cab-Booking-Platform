@@ -21,15 +21,18 @@ public class DriverService {
 
     private final DriverRepository driverRepository;
     private final DriverDocumentRepository driverDocumentRepository;
+    private final DriverVehicleRepository driverVehicleRepository;
     private final RideRepository rideRepository;
     private final RealtimeNotificationService notificationService;
 
     public DriverService(DriverRepository driverRepository,
                          DriverDocumentRepository driverDocumentRepository,
+                         DriverVehicleRepository driverVehicleRepository,
                          RideRepository rideRepository,
                          RealtimeNotificationService notificationService) {
         this.driverRepository = driverRepository;
         this.driverDocumentRepository = driverDocumentRepository;
+        this.driverVehicleRepository = driverVehicleRepository;
         this.rideRepository = rideRepository;
         this.notificationService = notificationService;
     }
@@ -148,5 +151,36 @@ public class DriverService {
         }
 
         return DriverDocumentDto.fromEntity(document);
+    }
+
+    @Transactional
+    public DriverProfileDto updateVehicle(UserPrincipal principal, UpdateVehicleRequest request) {
+        Driver driver = driverRepository.findByUserId(principal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Driver profile not found"));
+
+        List<DriverVehicle> vehicles = driverVehicleRepository.findByDriver(driver);
+        DriverVehicle vehicle;
+        if (!vehicles.isEmpty()) {
+            vehicle = vehicles.get(0);
+        } else {
+            vehicle = new DriverVehicle();
+            vehicle.setDriver(driver);
+            vehicle.setVerificationStatus(VerificationStatus.APPROVED);
+        }
+
+        vehicle.setMake(request.getMake().trim());
+        vehicle.setModel(request.getModel().trim());
+        vehicle.setYear(request.getYear());
+        vehicle.setRegistrationNumber(request.getRegistrationNumber().trim().toUpperCase());
+        vehicle.setColor(request.getColor().trim());
+        if (request.getVehicleCategory() != null) {
+            vehicle.setVehicleType(request.getVehicleCategory());
+        }
+        if (request.getSeatingCapacity() > 0) {
+            vehicle.setSeatingCapacity(request.getSeatingCapacity());
+        }
+        driverVehicleRepository.save(vehicle);
+
+        return DriverProfileDto.fromEntity(driver);
     }
 }

@@ -52,4 +52,17 @@ export const authService = {
     const res = await apiClient.get('/auth/me');
     return res.data.data;
   },
+
+  async updateProfile(data: { fullName: string; phoneNumber: string }): Promise<User> {
+    const res = await apiClient.put('/auth/profile', data);
+    return res.data.data;
+  },
+
+  async changePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
+    await apiClient.post('/auth/change-password', data);
+  },
+
+  async sendVerificationEmail(): Promise<void> {
+    await apiClient.post('/auth/send-verification');
+  },
 };

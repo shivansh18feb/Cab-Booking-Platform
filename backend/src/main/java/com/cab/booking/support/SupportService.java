@@ -54,4 +54,36 @@ public class SupportService {
         return supportTicketRepository.findByCreatedByOrderByCreatedAtDesc(user, pageable)
                 .map(SupportTicketDto::fromEntity);
     }
+
+    @Transactional(readOnly = true)
+    public Page<SupportTicketDto> getAllTickets(TicketStatus status, Pageable pageable) {
+        if (status != null) {
+            return supportTicketRepository.findByStatusOrderByCreatedAtDesc(status, pageable)
+                    .map(SupportTicketDto::fromEntity);
+        }
+        return supportTicketRepository.findAll(pageable).map(SupportTicketDto::fromEntity);
+    }
+
+    @Transactional
+    public SupportTicketDto updateTicket(Long ticketId, UpdateTicketStatusRequest request, UserPrincipal adminPrincipal) {
+        SupportTicket ticket = supportTicketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Support ticket not found: " + ticketId));
+
+        if (request.getStatus() != null) {
+            ticket.setStatus(request.getStatus());
+        }
+        if (request.getResolutionNotes() != null && !request.getResolutionNotes().isBlank()) {
+            ticket.setResolutionNotes(request.getResolutionNotes().trim());
+        }
+        if (request.getAssignedAdminId() != null) {
+            User admin = userRepository.findById(request.getAssignedAdminId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Admin not found: " + request.getAssignedAdminId()));
+            ticket.setAssignedAdmin(admin);
+        } else if (ticket.getAssignedAdmin() == null && adminPrincipal != null) {
+            userRepository.findById(adminPrincipal.getId()).ifPresent(ticket::setAssignedAdmin);
+        }
+
+        ticket = supportTicketRepository.save(ticket);
+        return SupportTicketDto.fromEntity(ticket);
+    }
 }

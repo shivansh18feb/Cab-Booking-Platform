@@ -60,7 +60,10 @@ public class Ride {
     private BigDecimal finalFare;
 
     @Column(nullable = false, length = 10)
-    private String currency = "USD";
+    private String currency = "INR";
+
+    @Column(name = "scheduled_for")
+    private Instant scheduledFor;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ride_status", nullable = false, length = 30)
@@ -185,6 +188,8 @@ public class Ride {
     public void setVersion(Long version) { this.version = version; }
     public List<RideEvent> getEvents() { return events; }
     public void setEvents(List<RideEvent> events) { this.events = events; }
+    public Instant getScheduledFor() { return scheduledFor; }
+    public void setScheduledFor(Instant scheduledFor) { this.scheduledFor = scheduledFor; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

@@ -16,9 +16,14 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     Optional<Rating> findByRide(Ride ride);
     boolean existsByRide(Ride ride);
     Page<Rating> findByDriverOrderByCreatedAtDesc(Driver driver, Pageable pageable);
+    Page<Rating> findByDriverAndIsHiddenFalseOrderByCreatedAtDesc(Driver driver, Pageable pageable);
 
-    @Query("SELECT AVG(r.stars) FROM Rating r WHERE r.driver = :driver")
+    @Query("SELECT AVG(r.stars) FROM Rating r WHERE r.driver = :driver AND r.isHidden = false")
     Double calculateAverageRatingForDriver(@Param("driver") Driver driver);
 
     long countByDriver(Driver driver);
+
+    Page<Rating> findByIsHiddenOrderByCreatedAtDesc(boolean isHidden, Pageable pageable);
+    Page<Rating> findByStarsOrderByCreatedAtDesc(int stars, Pageable pageable);
+    Page<Rating> findByIsHiddenAndStarsOrderByCreatedAtDesc(boolean isHidden, int stars, Pageable pageable);
 }

@@ -10,6 +10,7 @@ public class AppProperties {
     private Cors cors = new Cors();
     private Razorpay razorpay = new Razorpay();
     private Mail mail = new Mail();
+    private String frontendBaseUrl = "https://cab-booking-platform-seven.vercel.app";
 
     public static class Jwt {
         private String secret = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
@@ -67,4 +68,6 @@ public class AppProperties {
     public void setRazorpay(Razorpay razorpay) { this.razorpay = razorpay; }
     public Mail getMail() { return mail; }
     public void setMail(Mail mail) { this.mail = mail; }
+    public String getFrontendBaseUrl() { return frontendBaseUrl; }
+    public void setFrontendBaseUrl(String frontendBaseUrl) { this.frontendBaseUrl = frontendBaseUrl; }
 }

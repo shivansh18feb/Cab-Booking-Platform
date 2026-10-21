@@ -82,6 +82,17 @@ public class RideService {
         estimateReq.setPromoCode(request.getPromoCode());
         FareEstimateResponse estimate = pricingService.calculateEstimate(estimateReq);
 
+        boolean isScheduled = request.getScheduledFor() != null;
+        if (isScheduled) {
+            Instant scheduledTime = request.getScheduledFor();
+            if (scheduledTime.isBefore(Instant.now().plus(java.time.Duration.ofMinutes(15)))) {
+                throw new BadRequestException("Scheduled rides must be booked at least 15 minutes in advance");
+            }
+            if (scheduledTime.isAfter(Instant.now().plus(java.time.Duration.ofDays(7)))) {
+                throw new BadRequestException("Scheduled rides cannot be booked more than 7 days in advance");
+            }
+        }
+
         Ride ride = new Ride(
                 rider,
                 request.getPickupAddress().trim(),
@@ -96,22 +107,32 @@ public class RideService {
                 estimate.getTotalEstimatedFare(),
                 estimate.getCurrency()
         );
+        if (isScheduled) {
+            ride.setScheduledFor(request.getScheduledFor());
+            ride.setRideStatus(RideStatus.SCHEDULED);
+        }
         ride = rideRepository.save(ride);
 
         RideEvent event = new RideEvent(
                 ride,
-                RideEventType.RIDE_REQUESTED.name(),
+                isScheduled ? RideEventType.RIDE_SCHEDULED.name() : RideEventType.RIDE_REQUESTED.name(),
                 rider,
                 "RIDER",
-                "Ride requested for pickup at " + ride.getPickupAddress()
+                isScheduled
+                        ? "Ride scheduled for " + ride.getScheduledFor() + " at " + ride.getPickupAddress()
+                        : "Ride requested for pickup at " + ride.getPickupAddress()
         );
         rideEventRepository.save(event);
 
-        // Notify dispatch and real-time topics
+        // Notify rider real-time topic
         notificationService.notifyRideStatusUpdate(ride);
-        dispatchService.dispatchRideRequestToDrivers(ride);
 
-        log.info("New ride #{} created by rider {}", ride.getId(), rider.getId());
+        if (!isScheduled) {
+            // Immediately dispatch to drivers only for on-demand rides
+            dispatchService.dispatchRideRequestToDrivers(ride);
+        }
+
+        log.info("New ride #{} ({}) created by rider {}", ride.getId(), ride.getRideStatus(), rider.getId());
         return RideResponse.fromEntity(ride);
     }
 

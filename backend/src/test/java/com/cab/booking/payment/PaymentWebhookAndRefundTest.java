@@ -49,6 +49,8 @@ class PaymentWebhookAndRefundTest {
     private RealtimeNotificationService notificationService;
     @Mock
     private RazorpayClientFactory razorpayClientFactory;
+    @Mock
+    private com.cab.booking.email.EmailService emailService;
 
     private ObjectMapper objectMapper;
     private PaymentService paymentService;
@@ -75,7 +77,8 @@ class PaymentWebhookAndRefundTest {
                 appProperties,
                 notificationService,
                 razorpayClientFactory,
-                objectMapper
+                objectMapper,
+                emailService
         );
 
         razorpayProps = new AppProperties.Razorpay();

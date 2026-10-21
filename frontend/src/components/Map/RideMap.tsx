@@ -100,19 +100,53 @@ export const RideMap: React.FC<RideMapProps> = ({
   heightClass = 'h-[450px]',
 }) => {
   const defaultCenter: [number, number] = [40.7580, -73.9855]; // New York default
-  const pointsToFit: [number, number][] = [];
+  const [roadGeometry, setRoadGeometry] = React.useState<[number, number][]>([]);
 
+  React.useEffect(() => {
+    if (!pickup || !dropoff) {
+      setRoadGeometry([]);
+      return;
+    }
+
+    let active = true;
+    const fetchRoute = async () => {
+      try {
+        const res = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${pickup.lng},${pickup.lat};${dropoff.lng},${dropoff.lat}?overview=full&geometries=geojson`
+        );
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0 && data.routes[0].geometry) {
+          const coords = data.routes[0].geometry.coordinates.map(
+            (c: [number, number]) => [c[1], c[0]] as [number, number]
+          );
+          if (active) {
+            setRoadGeometry(coords);
+            return;
+          }
+        }
+      } catch {
+        // Fall back gracefully to direct straight line
+      }
+      if (active) {
+        setRoadGeometry([
+          [pickup.lat, pickup.lng],
+          [dropoff.lat, dropoff.lng],
+        ]);
+      }
+    };
+
+    fetchRoute();
+    return () => {
+      active = false;
+    };
+  }, [pickup?.lat, pickup?.lng, dropoff?.lat, dropoff?.lng]);
+
+  const pointsToFit: [number, number][] = [];
   if (pickup) pointsToFit.push([pickup.lat, pickup.lng]);
   if (dropoff) pointsToFit.push([dropoff.lat, dropoff.lng]);
   if (driverLocation) pointsToFit.push([driverLocation.lat, driverLocation.lng]);
 
   const initialCenter = pointsToFit.length > 0 ? pointsToFit[0] : defaultCenter;
-
-  const polylineCoords: [number, number][] = [];
-  if (pickup && dropoff) {
-    polylineCoords.push([pickup.lat, pickup.lng]);
-    polylineCoords.push([dropoff.lat, dropoff.lng]);
-  }
 
   return (
     <div className={`relative w-full ${heightClass} rounded-2xl overflow-hidden shadow-inner border border-slate-200 z-0`}>
@@ -148,13 +182,12 @@ export const RideMap: React.FC<RideMapProps> = ({
           </Marker>
         )}
 
-        {polylineCoords.length >= 2 && (
+        {roadGeometry.length >= 2 && (
           <Polyline
-            positions={polylineCoords}
-            color="#059669"
+            positions={roadGeometry}
+            color="#4f46e5"
             weight={5}
-            opacity={0.8}
-            dashArray="8, 8"
+            opacity={0.85}
           />
         )}
       </MapContainer>

@@ -112,6 +112,24 @@ export const driverService = {
       recentRides: raw.recentRides ?? [],
     };
   },
+
+  async updateVehicle(data: {
+    make: string;
+    model: string;
+    year: number;
+    registrationNumber: string;
+    color: string;
+    vehicleCategory?: string;
+    seatingCapacity?: number;
+  }): Promise<DriverProfile> {
+    const res = await apiClient.put('/drivers/me/vehicle', data);
+    return normalizeProfile(res.data.data);
+  },
+
+  async getMyRatings(driverId: number | string, page = 0, size = 10): Promise<any> {
+    const res = await apiClient.get(`/drivers/${driverId}/ratings`, { params: { page, size } });
+    return res.data.data;
+  },
 };
 
 export default driverService;

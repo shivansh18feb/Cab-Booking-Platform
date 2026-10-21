@@ -12,6 +12,9 @@ public class SupportTicketDto {
     private String description;
     private TicketPriority priority;
     private TicketStatus status;
+    private Long assignedAdminId;
+    private String assignedAdminName;
+    private String resolutionNotes;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -27,6 +30,11 @@ public class SupportTicketDto {
         dto.setDescription(ticket.getDescription());
         dto.setPriority(ticket.getPriority());
         dto.setStatus(ticket.getStatus());
+        if (ticket.getAssignedAdmin() != null) {
+            dto.setAssignedAdminId(ticket.getAssignedAdmin().getId());
+            dto.setAssignedAdminName(ticket.getAssignedAdmin().getFullName());
+        }
+        dto.setResolutionNotes(ticket.getResolutionNotes());
         dto.setCreatedAt(ticket.getCreatedAt());
         dto.setUpdatedAt(ticket.getUpdatedAt());
         return dto;
@@ -48,6 +56,12 @@ public class SupportTicketDto {
     public void setPriority(TicketPriority priority) { this.priority = priority; }
     public TicketStatus getStatus() { return status; }
     public void setStatus(TicketStatus status) { this.status = status; }
+    public Long getAssignedAdminId() { return assignedAdminId; }
+    public void setAssignedAdminId(Long assignedAdminId) { this.assignedAdminId = assignedAdminId; }
+    public String getAssignedAdminName() { return assignedAdminName; }
+    public void setAssignedAdminName(String assignedAdminName) { this.assignedAdminName = assignedAdminName; }
+    public String getResolutionNotes() { return resolutionNotes; }
+    public void setResolutionNotes(String resolutionNotes) { this.resolutionNotes = resolutionNotes; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

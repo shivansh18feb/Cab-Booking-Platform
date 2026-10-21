@@ -4,6 +4,7 @@ import com.cab.booking.common.BadRequestException;
 import com.cab.booking.common.ConflictException;
 import com.cab.booking.common.ResourceNotFoundException;
 import com.cab.booking.config.AppProperties;
+import com.cab.booking.email.EmailService;
 import com.cab.booking.realtime.RealtimeNotificationService;
 import com.cab.booking.ride.*;
 import com.cab.booking.security.UserPrincipal;
@@ -33,6 +34,7 @@ public class PaymentService {
     private final RealtimeNotificationService notificationService;
     private final RazorpayClientFactory razorpayClientFactory;
     private final ObjectMapper objectMapper;
+    private final EmailService emailService;
 
     public PaymentService(PaymentRepository paymentRepository,
                           RideRepository rideRepository,
@@ -40,7 +42,8 @@ public class PaymentService {
                           AppProperties appProperties,
                           RealtimeNotificationService notificationService,
                           RazorpayClientFactory razorpayClientFactory,
-                          ObjectMapper objectMapper) {
+                          ObjectMapper objectMapper,
+                          EmailService emailService) {
         this.paymentRepository = paymentRepository;
         this.rideRepository = rideRepository;
         this.rideEventRepository = rideEventRepository;
@@ -48,6 +51,7 @@ public class PaymentService {
         this.notificationService = notificationService;
         this.razorpayClientFactory = razorpayClientFactory;
         this.objectMapper = objectMapper;
+        this.emailService = emailService;
     }
 
     /**
@@ -203,6 +207,20 @@ public class PaymentService {
 
         notificationService.notifyRideStatusUpdate(ride);
         log.info("Payment successfully verified and completed for ride #{}", ride.getId());
+
+        // Send confirmation email to rider (async, non-blocking)
+        try {
+            emailService.sendPaymentConfirmation(
+                    ride.getRider().getEmail(),
+                    ride.getRider().getFullName(),
+                    ride.getId(),
+                    payment.getAmount(),
+                    request.getRazorpayPaymentId()
+            );
+        } catch (Exception e) {
+            log.warn("Payment confirmation email could not be queued for ride #{}: {}", ride.getId(), e.getMessage());
+        }
+
         return payment;
     }
 
@@ -382,7 +400,30 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
+    public Payment getPaymentForRide(Long rideId, UserPrincipal principal) {
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ride not found: " + rideId));
+
+        if (principal != null && !principal.getRole().name().equals("ADMIN")) {
+            boolean isRider = ride.getRider().getId().equals(principal.getId());
+            boolean isDriver = ride.getDriver() != null && ride.getDriver().getUser().getId().equals(principal.getId());
+            if (!isRider && !isDriver) {
+                throw new org.springframework.security.access.AccessDeniedException("You do not have permission to view payment information for this ride");
+            }
+        }
+
+        return paymentRepository.findByRideId(rideId).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
     public Payment getPaymentForRide(Long rideId) {
         return paymentRepository.findByRideId(rideId).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<PaymentResponse> getMyPayments(
+            UserPrincipal principal, org.springframework.data.domain.Pageable pageable) {
+        return paymentRepository.findByRiderId(principal.getId(), pageable)
+                .map(PaymentResponse::fromEntity);
     }
 }

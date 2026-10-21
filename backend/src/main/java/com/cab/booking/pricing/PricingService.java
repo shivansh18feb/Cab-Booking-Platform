@@ -58,40 +58,40 @@ public class PricingService {
 
         switch (category) {
             case HATCHBACK -> {
-                baseFare = new BigDecimal("2.50");
-                perKmRate = new BigDecimal("1.20");
-                perMinRate = new BigDecimal("0.25");
-                minFare = new BigDecimal("4.00");
+                baseFare = new BigDecimal("25.00");
+                perKmRate = new BigDecimal("12.00");
+                perMinRate = new BigDecimal("2.50");
+                minFare = new BigDecimal("40.00");
             }
             case SUV -> {
-                baseFare = new BigDecimal("5.00");
-                perKmRate = new BigDecimal("2.20");
-                perMinRate = new BigDecimal("0.50");
-                minFare = new BigDecimal("8.00");
+                baseFare = new BigDecimal("50.00");
+                perKmRate = new BigDecimal("22.00");
+                perMinRate = new BigDecimal("5.00");
+                minFare = new BigDecimal("80.00");
             }
             case PREMIUM -> {
-                baseFare = new BigDecimal("7.50");
-                perKmRate = new BigDecimal("3.00");
-                perMinRate = new BigDecimal("0.75");
-                minFare = new BigDecimal("12.00");
+                baseFare = new BigDecimal("75.00");
+                perKmRate = new BigDecimal("30.00");
+                perMinRate = new BigDecimal("7.50");
+                minFare = new BigDecimal("120.00");
             }
             case SEDAN -> {
-                baseFare = new BigDecimal("3.50");
-                perKmRate = new BigDecimal("1.50");
-                perMinRate = new BigDecimal("0.35");
-                minFare = new BigDecimal("5.00");
+                baseFare = new BigDecimal("35.00");
+                perKmRate = new BigDecimal("15.00");
+                perMinRate = new BigDecimal("3.50");
+                minFare = new BigDecimal("50.00");
             }
             default -> {
-                baseFare = new BigDecimal("3.50");
-                perKmRate = new BigDecimal("1.50");
-                perMinRate = new BigDecimal("0.35");
-                minFare = new BigDecimal("5.00");
+                baseFare = new BigDecimal("35.00");
+                perKmRate = new BigDecimal("15.00");
+                perMinRate = new BigDecimal("3.50");
+                minFare = new BigDecimal("50.00");
             }
         }
 
         BigDecimal distanceCharge = distanceKm.multiply(perKmRate).setScale(2, RoundingMode.HALF_UP);
         BigDecimal timeCharge = BigDecimal.valueOf(durationMinutes).multiply(perMinRate).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal serviceFee = new BigDecimal("1.50");
+        BigDecimal serviceFee = new BigDecimal("15.00");
         BigDecimal surgeMultiplier = new BigDecimal("1.00");
 
         BigDecimal subtotal = baseFare.add(distanceCharge).add(timeCharge).add(serviceFee);
@@ -135,7 +135,7 @@ public class PricingService {
         response.setSurgeMultiplier(surgeMultiplier);
         response.setDiscountAmount(discountAmount);
         response.setTotalEstimatedFare(total);
-        response.setCurrency("USD");
+        response.setCurrency("INR");
 
         return response;
     }

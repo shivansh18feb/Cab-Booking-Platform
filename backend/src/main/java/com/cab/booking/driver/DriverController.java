@@ -106,4 +106,13 @@ public class DriverController {
         List<DriverDocumentDto> docs = driverService.getMyDocuments(principal);
         return ResponseEntity.ok(ApiResponse.ok(docs));
     }
+
+    @PutMapping("/me/vehicle")
+    @Operation(summary = "Update driver vehicle details (make, model, year, plate, color, category)")
+    public ResponseEntity<ApiResponse<DriverProfileDto>> updateVehicle(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody UpdateVehicleRequest request) {
+        DriverProfileDto profile = driverService.updateVehicle(principal, request);
+        return ResponseEntity.ok(ApiResponse.ok("Vehicle details updated successfully", profile));
+    }
 }

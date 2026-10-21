@@ -57,11 +57,11 @@ class PricingServiceTest {
 
         assertNotNull(estimate);
         assertEquals(VehicleCategory.SEDAN, estimate.getVehicleCategory());
-        assertEquals(new BigDecimal("3.50"), estimate.getBaseFare());
-        assertEquals(new BigDecimal("1.50"), estimate.getServiceFee());
-        assertTrue(estimate.getTotalEstimatedFare().compareTo(new BigDecimal("5.00")) >= 0,
-                "Fare should be at least minimum fare ($5.00)");
-        assertEquals("USD", estimate.getCurrency());
+        assertEquals(new BigDecimal("35.00"), estimate.getBaseFare());
+        assertEquals(new BigDecimal("15.00"), estimate.getServiceFee());
+        assertTrue(estimate.getTotalEstimatedFare().compareTo(new BigDecimal("50.00")) >= 0,
+                "Fare should be at least minimum fare (₹50.00)");
+        assertEquals("INR", estimate.getCurrency());
     }
 
     @Test
@@ -108,7 +108,7 @@ class PricingServiceTest {
 
         assertNotNull(estimate);
         assertEquals(VehicleCategory.PREMIUM, estimate.getVehicleCategory());
-        assertTrue(estimate.getTotalEstimatedFare().compareTo(new BigDecimal("12.00")) >= 0,
-                "Premium minimum fare is $12.00");
+        assertTrue(estimate.getTotalEstimatedFare().compareTo(new BigDecimal("120.00")) >= 0,
+                "Premium minimum fare is ₹120.00");
     }
 }

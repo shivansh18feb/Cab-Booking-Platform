@@ -8,6 +8,7 @@ export const VehicleCategory = {
 export type VehicleCategory = (typeof VehicleCategory)[keyof typeof VehicleCategory];
 
 export type RideStatus =
+  | 'SCHEDULED'
   | 'REQUESTED'
   | 'ACCEPTED'
   | 'DRIVER_ARRIVING'
@@ -68,6 +69,7 @@ export interface Ride {
   cancellationReason?: string;
   cancelledBy?: string;
   requestedAt: string;
+  scheduledFor?: string;
   acceptedAt?: string;
   arrivedAt?: string;
   startedAt?: string;
@@ -105,4 +107,5 @@ export interface CreateRidePayload {
   dropoffLng?: number;
   vehicleCategory: VehicleCategory;
   promoCode?: string;
+  scheduledFor?: string;
 }

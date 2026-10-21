@@ -42,10 +42,27 @@ public class PaymentController {
     }
 
     @GetMapping("/ride/{rideId}")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Retrieve payment status for a specific ride")
-    public ResponseEntity<ApiResponse<Payment>> getPayment(@PathVariable Long rideId) {
-        Payment payment = paymentService.getPaymentForRide(rideId);
+    public ResponseEntity<ApiResponse<Payment>> getPayment(
+            @PathVariable Long rideId,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        Payment payment = paymentService.getPaymentForRide(rideId, principal);
         return ResponseEntity.ok(ApiResponse.ok(payment));
+    }
+
+    @GetMapping("/my-payments")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Retrieve paginated payment transactions for the authenticated rider")
+    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<PaymentResponse>>> getMyPayments(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        org.springframework.data.domain.Page<PaymentResponse> payments = paymentService.getMyPayments(
+                principal,
+                org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending())
+        );
+        return ResponseEntity.ok(ApiResponse.ok(payments));
     }
 
     @PostMapping("/{paymentId}/refund")

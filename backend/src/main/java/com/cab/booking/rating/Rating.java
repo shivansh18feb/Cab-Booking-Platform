@@ -32,6 +32,16 @@ public class Rating {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
+    @Column(name = "is_hidden", nullable = false)
+    private boolean isHidden = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "moderated_by")
+    private User moderatedBy;
+
+    @Column(name = "moderated_at")
+    private Instant moderatedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -58,6 +68,12 @@ public class Rating {
     public void setStars(int stars) { this.stars = stars; }
     public String getComment() { return comment; }
     public void setComment(String comment) { this.comment = comment; }
+    public boolean isHidden() { return isHidden; }
+    public void setHidden(boolean hidden) { isHidden = hidden; }
+    public User getModeratedBy() { return moderatedBy; }
+    public void setModeratedBy(User moderatedBy) { this.moderatedBy = moderatedBy; }
+    public Instant getModeratedAt() { return moderatedAt; }
+    public void setModeratedAt(Instant moderatedAt) { this.moderatedAt = moderatedAt; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

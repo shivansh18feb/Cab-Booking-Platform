@@ -54,8 +54,61 @@ export const adminService = {
     };
   },
 
-  async getAllTickets(page = 0, size = 10): Promise<{ content: any[]; totalPages: number; totalElements: number }> {
-    const res = await apiClient.get(`/admin/tickets?page=${page}&size=${size}`);
+  async getAllTickets(page = 0, size = 10, status?: string): Promise<{ content: any[]; totalPages: number; totalElements: number }> {
+    const statusParam = status ? `&status=${encodeURIComponent(status)}` : '';
+    const res = await apiClient.get(`/admin/tickets?page=${page}&size=${size}${statusParam}`);
+    return res.data.data;
+  },
+
+  async updateTicketStatus(ticketId: number | string, data: { status: string; resolutionNotes?: string; assignedAdminId?: number }): Promise<any> {
+    const res = await apiClient.patch(`/admin/tickets/${ticketId}/status`, data);
+    return res.data.data;
+  },
+
+  async getPromotions(page = 0, size = 10): Promise<{ content: any[]; totalPages: number; totalElements: number }> {
+    const res = await apiClient.get(`/admin/promotions?page=${page}&size=${size}`);
+    return res.data.data;
+  },
+
+  async createPromotion(data: any): Promise<any> {
+    const res = await apiClient.post('/admin/promotions', data);
+    return res.data.data;
+  },
+
+  async togglePromotion(promoId: number | string): Promise<any> {
+    const res = await apiClient.patch(`/admin/promotions/${promoId}/toggle`);
+    return res.data.data;
+  },
+
+  async deletePromotion(promoId: number | string): Promise<void> {
+    await apiClient.delete(`/admin/promotions/${promoId}`);
+  },
+
+  async getPromoRedemptions(promoId: number | string, page = 0, size = 10): Promise<{ content: any[]; totalPages: number; totalElements: number }> {
+    const res = await apiClient.get(`/admin/promotions/${promoId}/redemptions?page=${page}&size=${size}`);
+    return res.data.data;
+  },
+
+  async getReviews(page = 0, size = 10, isHidden?: boolean, stars?: number): Promise<{ content: any[]; totalPages: number; totalElements: number }> {
+    const hiddenParam = isHidden !== undefined ? `&isHidden=${isHidden}` : '';
+    const starsParam = stars !== undefined ? `&stars=${stars}` : '';
+    const res = await apiClient.get(`/admin/reviews?page=${page}&size=${size}${hiddenParam}${starsParam}`);
+    return res.data.data;
+  },
+
+  async toggleReviewVisibility(ratingId: number | string, hide: boolean): Promise<any> {
+    const res = await apiClient.patch(`/admin/reviews/${ratingId}/visibility?hide=${hide}`);
+    return res.data.data;
+  },
+
+  async deleteReview(ratingId: number | string): Promise<void> {
+    await apiClient.delete(`/admin/reviews/${ratingId}`);
+  },
+
+  async getAuditLogs(page = 0, size = 10, action?: string, resourceType?: string): Promise<{ content: any[]; totalPages: number; totalElements: number }> {
+    const actionParam = action ? `&action=${encodeURIComponent(action)}` : '';
+    const typeParam = resourceType ? `&resourceType=${encodeURIComponent(resourceType)}` : '';
+    const res = await apiClient.get(`/admin/audit-logs?page=${page}&size=${size}${actionParam}${typeParam}`);
     return res.data.data;
   },
 };

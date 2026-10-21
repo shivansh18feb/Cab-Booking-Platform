@@ -39,6 +39,9 @@ public class SupportTicket {
     @JoinColumn(name = "assigned_admin_id")
     private User assignedAdmin;
 
+    @Column(name = "resolution_notes", columnDefinition = "TEXT")
+    private String resolutionNotes;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -79,6 +82,8 @@ public class SupportTicket {
     public void setStatus(TicketStatus status) { this.status = status; }
     public User getAssignedAdmin() { return assignedAdmin; }
     public void setAssignedAdmin(User assignedAdmin) { this.assignedAdmin = assignedAdmin; }
+    public String getResolutionNotes() { return resolutionNotes; }
+    public void setResolutionNotes(String resolutionNotes) { this.resolutionNotes = resolutionNotes; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

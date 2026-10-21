@@ -64,11 +64,9 @@ public class AdminDashboardService {
                 rideRepository.countByRideStatus(RideStatus.IN_PROGRESS)
         );
 
-        BigDecimal revenue = paymentRepository.findAll().stream()
-                .filter(p -> p.getPaymentStatus() == PaymentStatus.COMPLETED)
-                .map(p -> p.getAmount() != null ? p.getAmount() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        stats.setTotalGrossRevenue(revenue);
+        // DB-side aggregate — no longer loads all payments into memory
+        BigDecimal revenue = paymentRepository.sumAmountByStatus(PaymentStatus.COMPLETED);
+        stats.setTotalGrossRevenue(revenue != null ? revenue : BigDecimal.ZERO);
 
         stats.setPendingTickets(supportTicketRepository.countByStatus(TicketStatus.OPEN) +
                                supportTicketRepository.countByStatus(TicketStatus.IN_PROGRESS));
@@ -109,6 +107,15 @@ public class AdminDashboardService {
     @Transactional(readOnly = true)
     public Page<RideResponse> getAllRides(Pageable pageable) {
         return rideRepository.findAll(pageable).map(RideResponse::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<RideResponse> getAllRides(RideStatus status, Pageable pageable) {
+        if (status == null) {
+            return getAllRides(pageable);
+        }
+        return rideRepository.findByRideStatusOrderByRequestedAtDesc(status, pageable)
+                .map(RideResponse::fromEntity);
     }
 
     @Transactional(readOnly = true)

@@ -32,6 +32,7 @@ public class RideResponse {
     private String cancellationReason;
     private String cancelledBy;
     private Instant requestedAt;
+    private Instant scheduledFor;
     private Instant acceptedAt;
     private Instant arrivedAt;
     private Instant startedAt;
@@ -102,6 +103,7 @@ public class RideResponse {
         res.setCancellationReason(ride.getCancellationReason());
         res.setCancelledBy(ride.getCancelledBy());
         res.setRequestedAt(ride.getRequestedAt());
+        res.setScheduledFor(ride.getScheduledFor());
         res.setAcceptedAt(ride.getAcceptedAt());
         res.setArrivedAt(ride.getArrivedAt());
         res.setStartedAt(ride.getStartedAt());
@@ -171,6 +173,8 @@ public class RideResponse {
     public void setCancelledBy(String cancelledBy) { this.cancelledBy = cancelledBy; }
     public Instant getRequestedAt() { return requestedAt; }
     public void setRequestedAt(Instant requestedAt) { this.requestedAt = requestedAt; }
+    public Instant getScheduledFor() { return scheduledFor; }
+    public void setScheduledFor(Instant scheduledFor) { this.scheduledFor = scheduledFor; }
     public Instant getAcceptedAt() { return acceptedAt; }
     public void setAcceptedAt(Instant acceptedAt) { this.acceptedAt = acceptedAt; }
     public Instant getArrivedAt() { return arrivedAt; }

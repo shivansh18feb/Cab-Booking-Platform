@@ -71,17 +71,17 @@ public class SecurityConfig {
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/rides/{id}/receipt").permitAll() // Authenticated via query token or bearer
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/rides/estimate").permitAll()
                         .requestMatchers("/api/v1/promotions/**", "/api/v1/promos/**").permitAll()
 
                         // Role-specific endpoints
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/drivers/**").hasAnyRole("DRIVER", "ADMIN")
                         .requestMatchers("/api/v1/riders/**").hasAnyRole("RIDER", "ADMIN")
 
-                        // Authenticated
+                        // Authenticated (including /api/v1/rides/{id}/receipt)
                         .anyRequest().authenticated()
                 );
 

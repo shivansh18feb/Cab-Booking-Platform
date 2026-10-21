@@ -75,6 +75,50 @@ public class RatingService {
     public Page<RatingResponse> getDriverRatings(Long driverId, Pageable pageable) {
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new ResourceNotFoundException("Driver not found"));
-        return ratingRepository.findByDriverOrderByCreatedAtDesc(driver, pageable).map(RatingResponse::fromEntity);
+        return ratingRepository.findByDriverAndIsHiddenFalseOrderByCreatedAtDesc(driver, pageable).map(RatingResponse::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<RatingResponse> getAllReviewsForAdmin(Boolean isHidden, Integer stars, Pageable pageable) {
+        if (isHidden != null && stars != null) {
+            return ratingRepository.findByIsHiddenAndStarsOrderByCreatedAtDesc(isHidden, stars, pageable)
+                    .map(RatingResponse::fromEntity);
+        } else if (isHidden != null) {
+            return ratingRepository.findByIsHiddenOrderByCreatedAtDesc(isHidden, pageable)
+                    .map(RatingResponse::fromEntity);
+        } else if (stars != null) {
+            return ratingRepository.findByStarsOrderByCreatedAtDesc(stars, pageable)
+                    .map(RatingResponse::fromEntity);
+        }
+        return ratingRepository.findAll(pageable).map(RatingResponse::fromEntity);
+    }
+
+    @Transactional
+    public RatingResponse toggleReviewVisibility(Long ratingId, boolean hide, UserPrincipal adminPrincipal) {
+        Rating rating = ratingRepository.findById(ratingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found: " + ratingId));
+        rating.setHidden(hide);
+        rating.setModeratedAt(java.time.Instant.now());
+        rating = ratingRepository.save(rating);
+
+        // Recalculate driver average rating
+        Driver driver = rating.getDriver();
+        Double avg = ratingRepository.calculateAverageRatingForDriver(driver);
+        driver.setAverageRating(avg != null ? BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP) : BigDecimal.valueOf(5.00));
+        driverRepository.save(driver);
+
+        return RatingResponse.fromEntity(rating);
+    }
+
+    @Transactional
+    public void deleteReview(Long ratingId, UserPrincipal adminPrincipal) {
+        Rating rating = ratingRepository.findById(ratingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found: " + ratingId));
+        Driver driver = rating.getDriver();
+        ratingRepository.delete(rating);
+
+        Double avg = ratingRepository.calculateAverageRatingForDriver(driver);
+        driver.setAverageRating(avg != null ? BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP) : BigDecimal.valueOf(5.00));
+        driverRepository.save(driver);
     }
 }

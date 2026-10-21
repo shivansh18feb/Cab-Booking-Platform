@@ -27,6 +27,8 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
 
     List<Ride> findByRideStatus(RideStatus status);
 
+    List<Ride> findByRideStatusAndScheduledForLessThanEqual(RideStatus status, Instant threshold);
+
     Optional<Ride> findFirstByRiderAndRideStatusInOrderByRequestedAtDesc(User rider, List<RideStatus> statuses);
 
     Optional<Ride> findFirstByDriverAndRideStatusInOrderByRequestedAtDesc(Driver driver, List<RideStatus> statuses);

@@ -22,9 +22,29 @@ public class PdfReceiptGeneratorService {
     }
 
     @Transactional(readOnly = true)
+    public byte[] generateRideReceiptPdf(Long rideId, com.cab.booking.security.UserPrincipal principal) {
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ride not found: " + rideId));
+
+        if (principal != null && !principal.getRole().name().equals("ADMIN")) {
+            boolean isRider = ride.getRider().getId().equals(principal.getId());
+            boolean isDriver = ride.getDriver() != null && ride.getDriver().getUser().getId().equals(principal.getId());
+            if (!isRider && !isDriver) {
+                throw new org.springframework.security.access.AccessDeniedException("You do not have permission to download the receipt for this ride");
+            }
+        }
+
+        return buildPdf(ride);
+    }
+
+    @Transactional(readOnly = true)
     public byte[] generateRideReceiptPdf(Long rideId) {
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ride not found: " + rideId));
+        return buildPdf(ride);
+    }
+
+    private byte[] buildPdf(Ride ride) {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4, 40, 40, 50, 50);

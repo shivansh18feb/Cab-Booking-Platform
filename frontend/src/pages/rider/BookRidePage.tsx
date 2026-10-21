@@ -30,6 +30,14 @@ export default function BookRidePage() {
   const [selectingPoint, setSelectingPoint] = useState<'pickup' | 'dropoff'>('pickup');
   const [estimateError, setEstimateError] = useState('');
 
+  // Scheduled ride state
+  const [bookingMode, setBookingMode] = useState<'now' | 'scheduled'>('now');
+  const [scheduledDateTime, setScheduledDateTime] = useState<string>(() => {
+    const d = new Date(Date.now() + 35 * 60 * 1000); // 35 mins from now
+    d.setMinutes(Math.ceil(d.getMinutes() / 5) * 5); // round to 5 mins
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  });
+
   /* reverse-geocode via Nominatim */
   const reverseGeocode = useCallback(async (lat: number, lng: number): Promise<string> => {
     try {
@@ -73,13 +81,31 @@ export default function BookRidePage() {
   });
 
   const bookMutation = useMutation({
-    mutationFn: () => rideService.createRide({
-      pickupLat: pickup!.lat, pickupLng: pickup!.lng, pickupAddress: pickupAddr,
-      dropoffLat: dropoff!.lat, dropoffLng: dropoff!.lng, dropoffAddress: dropoffAddr,
-      vehicleCategory: vehicle,
-      promoCode: promoCode || undefined,
-    }),
-    onSuccess: (ride) => navigate(`/rider/ride/${ride.id}/track`),
+    mutationFn: () => {
+      const isScheduled = bookingMode === 'scheduled';
+      const scheduledIso = isScheduled && scheduledDateTime
+        ? new Date(scheduledDateTime).toISOString()
+        : undefined;
+
+      return rideService.createRide({
+        pickupLat: pickup!.lat,
+        pickupLng: pickup!.lng,
+        pickupAddress: pickupAddr,
+        dropoffLat: dropoff!.lat,
+        dropoffLng: dropoff!.lng,
+        dropoffAddress: dropoffAddr,
+        vehicleCategory: vehicle,
+        promoCode: promoCode || undefined,
+        scheduledFor: scheduledIso,
+      });
+    },
+    onSuccess: (ride) => {
+      if (ride.rideStatus === 'SCHEDULED' || ride.status === 'SCHEDULED') {
+        navigate('/rider/history?scheduled=true');
+      } else {
+        navigate(`/rider/ride/${ride.id}/track`);
+      }
+    },
   });
 
   const canEstimate = pickup && dropoff;
@@ -92,6 +118,51 @@ export default function BookRidePage() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Left Panel */}
           <div className="lg:col-span-2 space-y-4">
+
+            {/* Ride Mode Selector (Instant vs Scheduled) */}
+            <div className="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm flex gap-1">
+              <button
+                type="button"
+                onClick={() => setBookingMode('now')}
+                className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                  bookingMode === 'now'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <span>⚡</span> Ride Now
+              </button>
+              <button
+                type="button"
+                onClick={() => setBookingMode('scheduled')}
+                className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                  bookingMode === 'scheduled'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <span>📅</span> Schedule Ride
+              </button>
+            </div>
+
+            {bookingMode === 'scheduled' && (
+              <div className="card border-indigo-200 bg-indigo-50/50 p-4 rounded-2xl">
+                <label className="block text-xs font-bold text-indigo-950 uppercase tracking-wider mb-1.5">
+                  Select Pickup Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduledDateTime}
+                  min={new Date(Date.now() + 15 * 60 * 1000).toISOString().slice(0, 16)}
+                  max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
+                  onChange={(e) => setScheduledDateTime(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-indigo-200 bg-white text-xs font-semibold text-indigo-950 focus:ring-2 focus:ring-indigo-500"
+                />
+                <p className="text-[11px] text-indigo-600 mt-1.5">
+                  Drivers will be automatically dispatched 15 minutes before your scheduled pickup.
+                </p>
+              </div>
+            )}
 
             {/* Step: Map Selection */}
             <div className="card">

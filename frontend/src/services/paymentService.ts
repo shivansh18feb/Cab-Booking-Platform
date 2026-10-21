@@ -87,6 +87,29 @@ export const paymentService = {
   },
 
   /**
+   * Retrieve paginated payment transactions for the authenticated rider.
+   */
+  async getMyPayments(
+    page = 0,
+    size = 10
+  ): Promise<{ content: any[]; totalPages: number; totalElements: number }> {
+    const res = await apiClient.get('/payments/my-payments', {
+      params: { page, size },
+    });
+    return res.data.data;
+  },
+
+  /**
+   * Download official PDF receipt as a Blob.
+   */
+  async downloadReceiptPdf(rideId: number | string): Promise<Blob> {
+    const res = await apiClient.get(`/rides/${rideId}/receipt`, {
+      responseType: 'blob',
+    });
+    return res.data;
+  },
+
+  /**
    * High-level flow: Creates order, loads SDK, and opens Razorpay modal with verification callback.
    */
   async initiateCheckout({

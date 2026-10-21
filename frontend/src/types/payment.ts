@@ -35,3 +35,19 @@ export interface PaymentRecord {
   refundedAmount?: number;
   createdAt?: string;
 }
+
+export interface PaymentTransaction {
+  id: number;
+  rideId?: number;
+  pickupAddress?: string;
+  dropoffAddress?: string;
+  amount: number;
+  currency: string;
+  paymentProvider: string;
+  paymentStatus: PaymentStatus;
+  providerPaymentId?: string;
+  providerPaymentIntentId?: string;
+  paidAt?: string;
+  refundedAmount?: number;
+  createdAt: string;
+}
